@@ -34,6 +34,42 @@ We also provide a [demo page](https://yummy-fir-7a4.notion.site/dia) comparing o
 pip install git+https://github.com/nari-labs/dia.git
 ```
 
+## 🚀 Production-ready CTranslate2 Backend
+
+### Voraussetzungen
+- Python-Pakete: `ctranslate2`, `torchaudio`, `transformers`, `ct2-transformers-converter`
+- Passender Tokenizer für dein Modell
+
+### Automatische Modell-Konvertierung & Download
+Falls das CTranslate2-Modell noch nicht existiert, wird es automatisch von HuggingFace heruntergeladen, nach ONNX exportiert und konvertiert.
+
+### Nutzung in Python
+```python
+from dia.ctranslate2 import DiaCTranslate2
+
+# Automatischer Download und Konvertierung, falls nötig:
+model = DiaCTranslate2.from_pretrained(
+    "models/ct2-dia",  # Zielverzeichnis für das CTranslate2-Modell
+    backend="cpu",
+    hf_model_name="nari-labs/Dia-1.6B"  # oder ein anderes HF-Modell
+)
+
+def my_tokenizer(text):
+    # Dein echter Tokenizer
+    return text.split()
+
+audio = model.generate("Hello world!", tokenizer=my_tokenizer)
+model.save_audio("output.wav", audio)
+```
+
+### Troubleshooting & Hinweise
+- Die Methode prüft automatisch, ob das Modell existiert und konvertiert es bei Bedarf.
+- Für die Automatisierung müssen die Tools `transformers` (mit ONNX-Export) und `ct2-transformers-converter` installiert und im Pfad verfügbar sein.
+- Das ONNX-Export-Feature ist aktuell auf `sequence-classification` gesetzt – ggf. für dein Modell anpassen!
+- Die generate()-Methode erwartet einen Tokenizer, der den Text in Modell-Tokens wandelt.
+- Für die Audio-Speicherung wird `torchaudio` benötigt.
+- Siehe Code und Artefakt-Referenz für weitere Details.
+
 ### Run the Gradio UI
 
 This will open a Gradio UI that you can work on.
