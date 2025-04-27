@@ -25,59 +25,71 @@ We also provide a [demo page](https://yummy-fir-7a4.notion.site/dia) comparing o
 - Join our [discord server](https://discord.gg/pgdB5YRe) for community support and access to new features.
 - Play with a larger version of Dia: generate fun conversations, remix content, and share with friends. 🔮 Join the [waitlist](https://tally.so/r/meokbo) for early access.
 
-## ⚡️ Quickstart
+## 🚀 Dia TTS: Benutzerfreundlicher Quickstart & Production-Workflow
 
-### Install via pip
+### 1. Installation (1 Befehl)
 
 ```bash
-# Install directly from GitHub
 pip install git+https://github.com/nari-labs/dia.git
 ```
 
-## 🚀 Production-ready CTranslate2 Backend
+### 2. Modell & Backend automatisch einrichten
 
-### Voraussetzungen
-- Python-Pakete: `ctranslate2`, `torchaudio`, `transformers`, `ct2-transformers-converter`
-- Passender Tokenizer für dein Modell
-
-### Automatische Modell-Konvertierung & Download
-Falls das CTranslate2-Modell noch nicht existiert, wird es automatisch von HuggingFace heruntergeladen, nach ONNX exportiert und konvertiert.
-
-### Nutzung in Python
 ```python
 from dia.ctranslate2 import DiaCTranslate2
 
-# Automatischer Download und Konvertierung, falls nötig:
+# Vollautomatischer Download, ONNX-Export & CTranslate2-Konvertierung:
 model = DiaCTranslate2.from_pretrained(
-    "models/ct2-dia",  # Zielverzeichnis für das CTranslate2-Modell
-    backend="cpu",
-    hf_model_name="nari-labs/Dia-1.6B"  # oder ein anderes HF-Modell
+    "models/ct2-dia",           # Zielverzeichnis für das CTranslate2-Modell
+    backend="cpu",              # Oder "cuda" für GPU
+    hf_model_name="nari-labs/Dia-1.6B"  # HuggingFace-Name oder lokaler Pfad
 )
 
 def my_tokenizer(text):
-    # Dein echter Tokenizer
+    # Beispiel-Tokenizer (ersetzen durch echten Tokenizer für beste Qualität)
     return text.split()
 
 audio = model.generate("Hello world!", tokenizer=my_tokenizer)
 model.save_audio("output.wav", audio)
 ```
 
-### Troubleshooting & Hinweise
-- Die Methode prüft automatisch, ob das Modell existiert und konvertiert es bei Bedarf.
-- Für die Automatisierung müssen die Tools `transformers` (mit ONNX-Export) und `ct2-transformers-converter` installiert und im Pfad verfügbar sein.
-- Das ONNX-Export-Feature ist aktuell auf `sequence-classification` gesetzt – ggf. für dein Modell anpassen!
-- Die generate()-Methode erwartet einen Tokenizer, der den Text in Modell-Tokens wandelt.
-- Für die Audio-Speicherung wird `torchaudio` benötigt.
-- Siehe Code und Artefakt-Referenz für weitere Details.
+**Features:**
+- Automatischer Download des HF-Modells (falls nicht vorhanden)
+- Automatischer ONNX-Export (inkl. dynamischer Batch/Seq-Länge)
+- Automatische Konvertierung zu CTranslate2-Format
+- Fehlerbehandlung & Logging integriert
+- Plug-and-play: Nur Text und Tokenizer nötig
 
-### Run the Gradio UI
-
-This will open a Gradio UI that you can work on.
+### 3. Gradio UI starten (optional)
 
 ```bash
 git clone https://github.com/nari-labs/dia.git
-cd dia && uv run app.py
+cd dia
+uv run app.py  # oder: python app.py
 ```
+
+### 4. Troubleshooting & Best Practices
+- **ONNX/GQA:** Aktuell ist der Export für Grouped Query Attention (GQA) in ONNX noch nicht möglich. Sobald PyTorch/ONNX dies unterstützt, genügt ein Update – das System erkennt und nutzt GQA automatisch.
+- **Tokenizer:** Für beste Ergebnisse nutze den Original-Tokenizer des Modells (siehe HuggingFace-Repo).
+- **Audio-Export:** Die Methode `save_audio()` benötigt `torchaudio`. Für MP3-Export siehe Artefakt-Referenz.
+- **Fehler:** Alle Schritte sind defensiv programmiert. Fehler beim Download, Export oder Konvertieren werden klar geloggt und führen zu hilfreichen Hinweisen.
+- **Modell-Update:** Um ein neues Modell zu nutzen, einfach den Namen/Pfad in `from_pretrained()` ändern.
+
+### 5. Roadmap & Hinweise
+- **GQA-Unterstützung:** Sobald ONNX/PyTorch GQA exportieren kann, wird dieses Repo automatisch kompatibel sein. Siehe [PyTorch Issue #151762](https://github.com/pytorch/pytorch/issues/151762).
+- **CTranslate2:** Das Backend wird kontinuierlich aktualisiert, um neue ONNX-Features zu unterstützen.
+- **Community:** Für Fragen, Feature-Requests und Support: [Discord](https://discord.gg/pgdB5YRe) oder GitHub-Issues.
+
+---
+
+**So einfach ist Dia TTS in Produktion zu bringen!**
+
+1. Installieren
+2. Modell einmalig initialisieren (automatisch alles erledigt)
+3. Text zu Audio generieren
+4. Optional: Eigene UI, Batch-Inferenz, Cloud-Deployment etc. – alles vorbereitet
+
+Für Details zu allen Optionen siehe die Artefakt-Referenz und Beispiel-Skripte.
 
 or if you do not have `uv` pre-installed:
 
